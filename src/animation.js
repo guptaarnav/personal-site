@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import GUI from "lil-gui";
 
-// Updated initAnimation function with lil-gui controls for rocket position and rotation
 function initAnimation() {
   const scene = new THREE.Scene();
 
@@ -44,7 +43,7 @@ function initAnimation() {
     angle: 0,
     magnitude: 1,
     dragCoefficient: 0.99,
-    turbulence: 0.5,
+    // turbulence is now calculated
   };
   const { plumeParticles, updatePlume } = createPlume(plumeParams, planeHeight);
 
@@ -58,13 +57,15 @@ function initAnimation() {
   gui
     .add(plumeParams, "dragCoefficient", 0.9, 1.0, 0.001)
     .name("Drag Coefficient");
-  gui.add(plumeParams, "turbulence", 0, 1, 0.01).name("Turbulence");
+  // Removed turbulence control
 
   // Add controls for rocket position and rotation
   const rocketParams = { x: 0, y: -1.5, rotationAngle: 0 };
-  gui.add(rocketParams, "x", -5, 5, 0.1).name("Rocket X Position");
-  gui.add(rocketParams, "y", -5, 5, 0.1).name("Rocket Y Position");
-  gui.add(rocketParams, "rotationAngle", -180, 180, 1).name("Rocket Rotation");
+  gui.add(rocketParams, "x", -5, 5, 0.001).name("Rocket X Position");
+  gui.add(rocketParams, "y", -5, 5, 0.001).name("Rocket Y Position");
+  gui
+    .add(rocketParams, "rotationAngle", -180, 180, 0.01)
+    .name("Rocket Rotation");
 
   // Animation loop
   const clock = new THREE.Clock();
@@ -133,7 +134,7 @@ function createPlume(plumeParams, planeHeight) {
     ages[i] = Math.random() * 2.0;
     lifespans[i] = 1.0 + Math.random() * 1.5;
 
-    sizes[i] = 10.0;
+    sizes[i] = 0.0; // Start with size zero since we're not emitting yet
 
     colors[i * 3] = 1.0;
     colors[i * 3 + 1] = 1.0;
@@ -176,7 +177,7 @@ function createPlume(plumeParams, planeHeight) {
   const plumeParticles = new THREE.Points(plumeGeometry, plumeMaterial);
 
   // Flag to track if there are active particles
-  let plumeHasActiveParticles = true;
+  let plumeHasActiveParticles = false;
 
   // Function to update particles
   function updatePlume(
@@ -193,6 +194,10 @@ function createPlume(plumeParams, planeHeight) {
 
     const shouldEmit = magnitude > 0;
     let activeParticles = 0;
+
+    // Calculate turbulence based on magnitude (parabolic relationship)
+    const maxTurbulence = 0.25;
+    const turbulence = maxTurbulence * magnitude * magnitude;
 
     for (let i = 0; i < particlesCount; i++) {
       // Update age
@@ -229,9 +234,9 @@ function createPlume(plumeParams, planeHeight) {
           const velocity = thrustDirection.multiplyScalar(speed);
 
           // Add initial turbulence
-          velocity.x += (Math.random() - 0.5) * plumeParams.turbulence;
-          velocity.y += (Math.random() - 0.5) * plumeParams.turbulence;
-          velocity.z += (Math.random() - 0.5) * plumeParams.turbulence;
+          velocity.x += (Math.random() - 0.5) * turbulence;
+          velocity.y += (Math.random() - 0.5) * turbulence;
+          velocity.z += (Math.random() - 0.5) * turbulence;
 
           // Store velocity
           velocities[i * 3] = velocity.x;
@@ -250,10 +255,7 @@ function createPlume(plumeParams, planeHeight) {
           activeParticles++;
         } else {
           // Particle is dead and we're not emitting new ones
-          // Optionally, set its size to zero to hide it
-          sizes[i] = 0;
-
-          // Reset velocities to zero
+          sizes[i] = 0; // Hide the particle
           velocities[i * 3] = 0;
           velocities[i * 3 + 1] = 0;
           velocities[i * 3 + 2] = 0;
@@ -269,12 +271,9 @@ function createPlume(plumeParams, planeHeight) {
         velocities[i * 3 + 2] *= drag;
 
         // Add turbulence
-        velocities[i * 3] +=
-          (Math.random() - 0.5) * plumeParams.turbulence * deltaTime;
-        velocities[i * 3 + 1] +=
-          (Math.random() - 0.5) * plumeParams.turbulence * deltaTime;
-        velocities[i * 3 + 2] +=
-          (Math.random() - 0.5) * plumeParams.turbulence * deltaTime;
+        velocities[i * 3] += (Math.random() - 0.5) * turbulence * deltaTime;
+        velocities[i * 3 + 1] += (Math.random() - 0.5) * turbulence * deltaTime;
+        velocities[i * 3 + 2] += (Math.random() - 0.5) * turbulence * deltaTime;
 
         // Update positions
         positions[i * 3] += velocities[i * 3] * deltaTime;
@@ -305,57 +304,56 @@ function createPlume(plumeParams, planeHeight) {
 
 // Vertex Shader
 const vertexShaderSource = `
-    attribute float age;
-    attribute float lifespan;
-    attribute float size;
-    varying float vAge;
-    varying float vLifespan;
-  
-    void main() {
-      vAge = age;
-      vLifespan = lifespan;
-  
-      // Calculate point size based on age
-      float lifeProgress = vAge / vLifespan;
-      float pointSize = size * (1.0 - lifeProgress);
-  
-      // Set the point size
-      gl_PointSize = pointSize;
-  
-      // Transform position
-      vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-      gl_Position = projectionMatrix * mvPosition;
-    }
-  `;
+  attribute float age;
+  attribute float lifespan;
+  attribute float size;
+  varying float vAge;
+  varying float vLifespan;
+
+  void main() {
+    vAge = age;
+    vLifespan = lifespan;
+
+    // Calculate point size based on age
+    float lifeProgress = vAge / vLifespan;
+    float pointSize = size * (1.0 - lifeProgress);
+
+    // Set the point size
+    gl_PointSize = pointSize;
+
+    // Transform position
+    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+    gl_Position = projectionMatrix * mvPosition;
+  }
+`;
 
 // Fragment Shader
 const fragmentShaderSource = `
-    uniform sampler2D particleTexture;
-    varying float vAge;
-    varying float vLifespan;
-  
-    void main() {
-      // Calculate life progress
-      float lifeProgress = vAge / vLifespan;
-  
-      // Color transitions from fire to smoke
-      vec3 fireColor = vec3(1.0, 0.5, 0.0); // Orange
-      vec3 smokeColor = vec3(0.2, 0.2, 0.2); // Dark gray
-  
-      // Interpolate color based on life progress
-      vec3 color = mix(fireColor, smokeColor, lifeProgress);
-  
-      // Fetch alpha from texture
-      float alpha = texture2D(particleTexture, gl_PointCoord).a;
-  
-      // Fade out over time
-      alpha *= (1.0 - lifeProgress);
-  
-      // Output final color
-      gl_FragColor = vec4(color, alpha);
-    }
-  `;
+  uniform sampler2D particleTexture;
+  varying float vAge;
+  varying float vLifespan;
 
+  void main() {
+    // Calculate life progress
+    float lifeProgress = vAge / vLifespan;
+
+    // Color transitions from fire to smoke
+    vec3 fireColor = vec3(1.0, 0.5, 0.0); // Orange
+    vec3 smokeColor = vec3(0.2, 0.2, 0.2); // Dark gray
+
+    // Interpolate color based on life progress
+    vec3 color = mix(fireColor, smokeColor, lifeProgress);
+
+    // Fetch alpha from texture
+    float alpha = texture2D(particleTexture, gl_PointCoord).a;
+
+    // Fade out over time
+    alpha *= (1.0 - lifeProgress);
+
+    // Output final color
+    gl_FragColor = vec4(color, alpha);
+  }
+`;
 // Function to create the gradient background texture
 function createGradientTexture() {
   const canvas = document.createElement("canvas");
