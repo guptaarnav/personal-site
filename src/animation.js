@@ -27,7 +27,7 @@ function initAnimation() {
   // Rocket mesh setup
   const rocketTexture = new THREE.TextureLoader().load("textures/starship.png");
   const aspectRatio = 138 / 443;
-  const planeHeight = 2;
+  const planeHeight = 1;
   const planeWidth = planeHeight * aspectRatio;
   const rocketGeometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
   const rocketMaterial = new THREE.MeshBasicMaterial({
