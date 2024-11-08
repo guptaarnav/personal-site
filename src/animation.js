@@ -46,10 +46,11 @@ function createGradientTexture() {
   canvas.width = 2;
   canvas.height = 2;
 
-  // Gradient from black to dark blue
+  // Gradient from black at the top to dark blue at the bottom with a sharper transition
   const gradient = context.createLinearGradient(0, 0, 0, canvas.height);
-  gradient.addColorStop(0, '#000000'); // Black
-  gradient.addColorStop(1, '#000044'); // Dark blue
+  gradient.addColorStop(0, '#000000');   // Deep black at the top
+  gradient.addColorStop(0.4, '#000022'); // Very dark blue to make the transition more pronounced
+  gradient.addColorStop(1, '#000044');   // Dark blue at the bottom
 
   context.fillStyle = gradient;
   context.fillRect(0, 0, canvas.width, canvas.height);
@@ -59,7 +60,7 @@ function createGradientTexture() {
   return texture;
 }
 
-// Function to create stars as a particle system
+// Function to create stars with a smaller maximum size
 function createStars(count) {
   const geometry = new THREE.BufferGeometry();
   const positions = [];
@@ -74,10 +75,10 @@ function createStars(count) {
 
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
 
-  // Material for stars
+  // Material for stars with reduced size and slightly varying opacity
   const material = new THREE.PointsMaterial({
     color: 0xffffff,
-    size: 0.5,
+    size: Math.pow(Math.random() * 0.3, 2) + 0.2, // Randomize size between 0.1 and 0.4 for smaller stars
     transparent: true,
     opacity: 0.8,
     depthWrite: false,
@@ -89,13 +90,13 @@ function createStars(count) {
   return stars;
 }
 
-// Function to animate the stars for a twinkling effect
+// Function to animate stars with a more pronounced twinkling effect
 function animateStars(stars) {
   const positions = stars.geometry.attributes.position.array;
 
   for (let i = 0; i < positions.length; i += 3) {
-    // Twinkling effect by changing y-position slightly
-    positions[i + 1] += Math.sin(Date.now() * 0.001 + i) * 0.005;
+    // Adjust twinkling by modulating the y-position with a stronger amplitude and frequency
+    positions[i + 1] += Math.sin(Date.now() * 0.002 + i) * 0.01;
   }
 
   stars.geometry.attributes.position.needsUpdate = true;
