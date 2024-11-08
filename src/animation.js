@@ -21,7 +21,7 @@ function initAnimation() {
   // Background and stars
   const gradientTexture = createGradientTexture();
   scene.background = gradientTexture;
-  const stars = createStars(2000);
+  const stars = createStars(3000);
   scene.add(stars);
 
   // Rocket mesh setup
@@ -196,7 +196,7 @@ function createPlume(plumeParams, planeHeight) {
     let activeParticles = 0;
 
     // Calculate turbulence based on magnitude (parabolic relationship)
-    const maxTurbulence = 0.25;
+    const maxTurbulence = 0.75;
     const turbulence = maxTurbulence * magnitude * magnitude;
 
     for (let i = 0; i < particlesCount; i++) {
@@ -392,7 +392,7 @@ function createStars(count) {
 
   const material = new THREE.PointsMaterial({
     color: 0xffffff,
-    size: Math.min(Math.pow(Math.random() * 0.3, 2) + 0.2, 0.2),
+    size: Math.min(Math.random() * 0.3 + 0.2, 0.15),
     transparent: true,
     opacity: 0.8,
     depthWrite: false,
@@ -408,6 +408,7 @@ function animateStars(stars) {
   const positions = stars.geometry.attributes.position.array;
 
   for (let i = 0; i < positions.length; i += 3) {
+    // Animate position
     positions[i + 1] += Math.sin(Date.now() * 0.002 + i) * 0.001;
   }
 
