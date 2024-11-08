@@ -36,13 +36,13 @@ jobs:
         env:
           SSH_PASS: ${{ secrets.PRODUCTION_SERVER_PASS }}
         run: |
-          sshpass -p "$SSH_PASS" scp -o StrictHostKeyChecking=no -r dist/* ${{ secrets.PRODUCTION_SERVER_USERNAME }}@${{ vars.PRODUCTION_SERVER_IP }}:/root/dist/
+          sshpass -p "$SSH_PASS" scp -o StrictHostKeyChecking=no -r dist/* ${{ secrets.PRODUCTION_SERVER_USERNAME }}@${{ vars.PRODUCTION_SERVER_IP }}:~/dist/
 
       - name: SCP Go Binary to Production Server
         env:
           SSH_PASS: ${{ secrets.PRODUCTION_SERVER_PASS }}
         run: |
-          sshpass -p "$SSH_PASS" scp -o StrictHostKeyChecking=no main ${{ secrets.PRODUCTION_SERVER_USERNAME }}@${{ vars.PRODUCTION_SERVER_IP }}:/root/
+          sshpass -p "$SSH_PASS" scp -o StrictHostKeyChecking=no main ${{ secrets.PRODUCTION_SERVER_USERNAME }}@${{ vars.PRODUCTION_SERVER_IP }}:~
 
       - name: Restart Server Service
         env:
