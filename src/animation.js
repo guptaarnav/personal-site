@@ -30,7 +30,7 @@ function initAnimation() {
   const rocketTexture = new THREE.TextureLoader().load('textures/starship.png');
 
   // Get rocket's aspect ratio based on actual image dimensions, e.g., 400 x 1000 pixels
-  const rocketWidthInPixels = 600;  // Replace with actual width
+  const rocketWidthInPixels = 700;  // Replace with actual width
   const rocketHeightInPixels = 1000; // Replace with actual height
   const aspectRatio = rocketWidthInPixels / rocketHeightInPixels;
 

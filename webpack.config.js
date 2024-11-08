@@ -21,6 +21,10 @@ module.exports = {
           },
         },
       },
+      {
+        test: /\.css$/,               // Add CSS rule
+        use: ['style-loader', 'css-loader'], // Process CSS files
+      },
     ],
   },
   plugins: [
@@ -29,7 +33,7 @@ module.exports = {
     }),
     new CopyWebpackPlugin({
       patterns: [
-        { from: 'textures', to: 'textures' }, // Copy textures folder to dist/textures
+        { from: 'textures', to: 'textures' }, // Copy textures folder to dist
       ],
     }),
   ],

@@ -1,0 +1,20 @@
+/* src/styles.css */
+
+/* Reset body and html to remove default padding and margin */
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* Prevent horizontal overflow */
+  }
+  
+  /* Fullscreen container for the Three.js animation */
+  #animation-container {
+    width: 100vw;              /* Full width of viewport */
+    height: 100vh;             /* Full height of viewport */
+    display: flex;
+    align-items: center;       /* Center canvas vertically */
+    justify-content: center;   /* Center canvas horizontally */
+    background-color: black;   /* Optional: fallback background color */
+    overflow: hidden;
+  }
+  
