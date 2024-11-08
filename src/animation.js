@@ -86,9 +86,9 @@ function createGradientTexture() {
 
   // Lower the transition midpoint so it turns black sooner
   const gradient = context.createLinearGradient(0, 0, 0, canvas.height);
-  gradient.addColorStop(0.1, '#000000');   // Deep black at the top
-  gradient.addColorStop(0.6, '#000011'); // Dark blue closer to the bottom
-  gradient.addColorStop(1, '#000066');   // Dark blue at the very bottom
+  gradient.addColorStop(0.7, '#000000');   // Deep black at the top
+  gradient.addColorStop(1, '#000011'); // Dark blue closer to the bottom
+//   gradient.addColorStop(1, '#000066');   // Dark blue at the very bottom
 
   context.fillStyle = gradient;
   context.fillRect(0, 0, canvas.width, canvas.height);
@@ -116,7 +116,7 @@ function createStars(count) {
   // Material for stars with reduced size and slightly varying opacity
   const material = new THREE.PointsMaterial({
     color: 0xffffff,
-    size: Math.max(Math.pow(Math.random() * 0.3, 2) + 0.2, 0.3), // Randomize size between 0.1 and 0.4 for smaller stars
+    size: Math.min(Math.pow(Math.random() * 0.3, 2) + 0.2, 0.3), // Randomize size between 0.1 and 0.4 for smaller stars
     transparent: true,
     opacity: 0.8,
     depthWrite: false,
