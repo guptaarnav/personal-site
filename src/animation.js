@@ -66,18 +66,16 @@ function initAnimation() {
 }
 
 // Function to handle window resize and keep the rocket's aspect ratio
-function onWindowResize(renderer, camera, rocket, aspectRatio) {
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  camera.aspect = width / height;
-  camera.updateProjectionMatrix();
-  renderer.setSize(width, height);
-
-  // Update the rocket's width and height to maintain its aspect ratio
-  const planeHeight = 3; // Desired height in scene units
-  rocket.scale.set(planeHeight * aspectRatio, planeHeight, 1);
-}
-
+function onWindowResize(renderer, camera) {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    
+    // Update the camera's aspect ratio and renderer's size
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height);
+  }
+  
 // Function to create the gradient background texture
 function createGradientTexture() {
   const canvas = document.createElement('canvas');
