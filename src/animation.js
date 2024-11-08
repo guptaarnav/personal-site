@@ -13,7 +13,7 @@ function initAnimation() {
   camera.position.z = 5;
 
   // Set up renderer
-  const renderer = new THREE.WebGLRenderer();
+  const renderer = new THREE.WebGLRenderer({ alpha: true }); // Enable alpha for transparent backgrounds
   renderer.setSize(window.innerWidth, window.innerHeight);
   
   // Append renderer to the DOM
@@ -28,37 +28,55 @@ function initAnimation() {
   const stars = createStars(2000);
   scene.add(stars);
 
+  // Load and add the rocket image
+  const rocketTexture = new THREE.TextureLoader().load('textures/starship.png');
+
+  // Create a plane to display the rocket texture
+  const rocketGeometry = new THREE.PlaneGeometry(1, 2.5); // Adjust size to fit rocket proportions
+  const rocketMaterial = new THREE.MeshBasicMaterial({
+    map: rocketTexture,
+    transparent: true, // Make background of rocket texture transparent
+  });
+
+  const rocket = new THREE.Mesh(rocketGeometry, rocketMaterial);
+  rocket.position.y = 10.5; // Position rocket a bit lower in the scene
+  scene.add(rocket);
+
   // Animation loop
   function animate() {
     requestAnimationFrame(animate);
     animateStars(stars);
+
+    // Add a slight oscillation for the rocket to simulate hovering
+    rocket.position.y = -1.5 + Math.sin(Date.now() * 0.003) * 0.05;
+
     renderer.render(scene, camera);
   }
-  
+
   animate();
 }
 
 // Function to create the gradient background texture
 function createGradientTexture() {
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-  
-    canvas.width = 2;
-    canvas.height = 2;
-  
-    // Lower the transition midpoint so it turns black sooner
-    const gradient = context.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0.1, '#000000');   // Deep black at the top
-    gradient.addColorStop(0.6, '#000011'); // Dark blue closer to the bottom
-    gradient.addColorStop(1, '#000066');   // Dark blue at the very bottom
-  
-    context.fillStyle = gradient;
-    context.fillRect(0, 0, canvas.width, canvas.height);
-  
-    const texture = new THREE.Texture(canvas);
-    texture.needsUpdate = true;
-    return texture;
-  }
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+
+  canvas.width = 2;
+  canvas.height = 2;
+
+  // Lower the transition midpoint so it turns black sooner
+  const gradient = context.createLinearGradient(0, 0, 0, canvas.height);
+  gradient.addColorStop(0.1, '#000000');   // Deep black at the top
+  gradient.addColorStop(0.6, '#000011'); // Dark blue closer to the bottom
+  gradient.addColorStop(1, '#000066');   // Dark blue at the very bottom
+
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, canvas.width, canvas.height);
+
+  const texture = new THREE.Texture(canvas);
+  texture.needsUpdate = true;
+  return texture;
+}
 
 // Function to create stars with a smaller maximum size
 function createStars(count) {

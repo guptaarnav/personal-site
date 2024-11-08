@@ -28,9 +28,15 @@ module.exports = {
     }),
   ],
   devServer: {
-    static: {
-      directory: path.join(__dirname, 'dist'),
-    },
+    static: [
+      {
+        directory: path.join(__dirname, 'dist'),
+      },
+      {
+        directory: path.join(__dirname, 'textures'), // Serve textures folder
+        publicPath: '/textures',
+      },
+    ],
     compress: true,
     port: 9000,
   },
