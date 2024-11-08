@@ -3,7 +3,7 @@ import * as THREE from 'three';
 function initAnimation() {
   const scene = new THREE.Scene();
 
-  // Set up camera
+  // Set up a perspective camera for the general scene (stars and background)
   const camera = new THREE.PerspectiveCamera(
     75,
     window.innerWidth / window.innerHeight,
@@ -15,8 +15,6 @@ function initAnimation() {
   // Set up renderer
   const renderer = new THREE.WebGLRenderer({ alpha: true }); // Enable alpha for transparent backgrounds
   renderer.setSize(window.innerWidth, window.innerHeight);
-  
-  // Append renderer to the DOM
   const container = document.getElementById('animation-container');
   container.appendChild(renderer.domElement);
 
@@ -28,19 +26,30 @@ function initAnimation() {
   const stars = createStars(2000);
   scene.add(stars);
 
-  // Load and add the rocket image
+  // Load and add the rocket image using a dedicated OrthographicCamera to avoid squishing
   const rocketTexture = new THREE.TextureLoader().load('textures/starship.png');
 
-  // Create a plane to display the rocket texture
-  const rocketGeometry = new THREE.PlaneGeometry(1, 2.5); // Adjust size to fit rocket proportions
+  // Get rocket's aspect ratio based on actual image dimensions, e.g., 400 x 1000 pixels
+  const rocketWidthInPixels = 600;  // Replace with actual width
+  const rocketHeightInPixels = 1000; // Replace with actual height
+  const aspectRatio = rocketWidthInPixels / rocketHeightInPixels;
+
+  // Adjust plane size according to aspect ratio
+  const planeHeight = 3; // Desired height in scene units
+  const planeWidth = planeHeight * aspectRatio; // Adjust width based on aspect ratio
+
+  const rocketGeometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
   const rocketMaterial = new THREE.MeshBasicMaterial({
     map: rocketTexture,
-    transparent: true, // Make background of rocket texture transparent
+    transparent: true,
   });
 
   const rocket = new THREE.Mesh(rocketGeometry, rocketMaterial);
-  rocket.position.y = 10.5; // Position rocket a bit lower in the scene
+  rocket.position.y = -1.5; // Position the rocket lower in the scene
   scene.add(rocket);
+
+  // Resize handling
+  window.addEventListener('resize', () => onWindowResize(renderer, camera, rocket, aspectRatio));
 
   // Animation loop
   function animate() {
@@ -54,6 +63,19 @@ function initAnimation() {
   }
 
   animate();
+}
+
+// Function to handle window resize and keep the rocket's aspect ratio
+function onWindowResize(renderer, camera, rocket, aspectRatio) {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(width, height);
+
+  // Update the rocket's width and height to maintain its aspect ratio
+  const planeHeight = 3; // Desired height in scene units
+  rocket.scale.set(planeHeight * aspectRatio, planeHeight, 1);
 }
 
 // Function to create the gradient background texture
@@ -96,7 +118,7 @@ function createStars(count) {
   // Material for stars with reduced size and slightly varying opacity
   const material = new THREE.PointsMaterial({
     color: 0xffffff,
-    size: Math.pow(Math.random() * 0.3, 2) + 0.2, // Randomize size between 0.1 and 0.4 for smaller stars
+    size: Math.max(Math.pow(Math.random() * 0.3, 2) + 0.2, 0.3), // Randomize size between 0.1 and 0.4 for smaller stars
     transparent: true,
     opacity: 0.8,
     depthWrite: false,
