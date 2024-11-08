@@ -25,7 +25,7 @@ function initAnimation() {
   scene.background = gradientTexture;
 
   // Create stars
-  const stars = createStars(1000);
+  const stars = createStars(2000);
   scene.add(stars);
 
   // Animation loop
@@ -40,25 +40,25 @@ function initAnimation() {
 
 // Function to create the gradient background texture
 function createGradientTexture() {
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d');
-
-  canvas.width = 2;
-  canvas.height = 2;
-
-  // Gradient from black at the top to dark blue at the bottom with a sharper transition
-  const gradient = context.createLinearGradient(0, 0, 0, canvas.height);
-  gradient.addColorStop(0, '#000000');   // Deep black at the top
-  gradient.addColorStop(0.4, '#000022'); // Very dark blue to make the transition more pronounced
-  gradient.addColorStop(1, '#000044');   // Dark blue at the bottom
-
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, canvas.width, canvas.height);
-
-  const texture = new THREE.Texture(canvas);
-  texture.needsUpdate = true;
-  return texture;
-}
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+  
+    canvas.width = 2;
+    canvas.height = 2;
+  
+    // Lower the transition midpoint so it turns black sooner
+    const gradient = context.createLinearGradient(0, 0, 0, canvas.height);
+    gradient.addColorStop(0.1, '#000000');   // Deep black at the top
+    gradient.addColorStop(0.6, '#000011'); // Dark blue closer to the bottom
+    gradient.addColorStop(1, '#000066');   // Dark blue at the very bottom
+  
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+  
+    const texture = new THREE.Texture(canvas);
+    texture.needsUpdate = true;
+    return texture;
+  }
 
 // Function to create stars with a smaller maximum size
 function createStars(count) {
@@ -96,7 +96,7 @@ function animateStars(stars) {
 
   for (let i = 0; i < positions.length; i += 3) {
     // Adjust twinkling by modulating the y-position with a stronger amplitude and frequency
-    positions[i + 1] += Math.sin(Date.now() * 0.002 + i) * 0.01;
+    positions[i + 1] += Math.sin(Date.now() * 0.002 + i) * 0.001;
   }
 
   stars.geometry.attributes.position.needsUpdate = true;
